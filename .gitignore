@@ -1,0 +1,51 @@
+# Build Folders
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Rider IDE
+.idea/
+*.sln.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ASP.NET Core / Entity Framework
+*.db
+*.log
+
+# NuGet packages
+*.nupkg
+packages/
+# NuGet v3
+*.nuget.props
+*.nuget.targets
+
+# Node / frontend
+node_modules/
+dist/
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# JetBrains Rider caches
+.idea/
+*.sln.iml
+
+# Rider specific folders
+.idea/
+*.ipr
+*.iws
