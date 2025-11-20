@@ -6,6 +6,5 @@ public record AuthResponseDto
     string Email,
     string Username,
     string? FirstName,
-    string? LastName,
-    DateTime ExpiresAt
+    string? LastName
 );
