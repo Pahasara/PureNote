@@ -38,6 +38,9 @@ public static  class AuthHandlers
             return Results.BadRequest(new {message="Username is already taken." });
         }
         
+        // Generate encryption salt
+        var encryptionSalt = EncryptionService.GenerateUserSalt();
+        
         // Create user
         var user = new User
         {
@@ -46,6 +49,7 @@ public static  class AuthHandlers
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             CreatedAt = DateTime.UtcNow,
+            EncryptionSalt = encryptionSalt,
         };
 
         var result = await userManager.CreateAsync(user, dto.Password);
@@ -53,7 +57,7 @@ public static  class AuthHandlers
         {
             return Results.BadRequest(new
             {
-                mesage = "User creation failed.",
+                message = "User creation failed.",
                 errors = result.Errors.Select(e => e.Description)
             });
         }
