@@ -16,6 +16,7 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
             .IsRequired();
         
         builder.Property(t => t.UserId)
+            .HasMaxLength(128)
             .IsRequired();
 
         builder.HasOne(t => t.User)
