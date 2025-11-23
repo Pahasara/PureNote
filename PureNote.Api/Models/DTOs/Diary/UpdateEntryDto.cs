@@ -6,6 +6,7 @@ public record UpdateEntryDto
 (
     string Title,
     string Content,
+    string Password,
     string? Mood,
-    ICollection<Tag>? Tags
+    ICollection<string>? Tags
 );

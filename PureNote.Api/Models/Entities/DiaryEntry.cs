@@ -12,5 +12,5 @@ public class DiaryEntry
     public required string UserId { get; init; }
     public User User { get; init; } = null!;
     
-    public List<Tag> Tags { get; init; } = [];
+    public List<Tag> Tags { get; set; } = [];
 }
