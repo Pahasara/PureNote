@@ -11,12 +11,14 @@ public static class AuthEndpoints
             .AllowAnonymous();
 
         authGroup.MapPost("/register", AuthHandlers.Register)
+            .RequireRateLimiting("RegisterLimiter")
             .WithName("Register")
             .WithSummary("Register new user")
             .Produces<AuthResponseDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
         authGroup.MapPost("/login", AuthHandlers.Login)
+            .RequireRateLimiting("LoginLimiter")
             .WithName("Login")
             .WithSummary("Login with username/email and password")
             .Produces<AuthResponseDto>()

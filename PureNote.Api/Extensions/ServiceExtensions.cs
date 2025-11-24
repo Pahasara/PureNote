@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -146,6 +148,52 @@ public static class ServiceExtensions
     public static IServiceCollection AddValidation(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<RegisterDto>();
+        return services;
+    }
+
+    public static IServiceCollection AddRateLimiters(this IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            // Login brute-force prevention
+            options.AddPolicy("LoginLimiter", ctx =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    }
+                )
+            );
+                
+            // Register spam protection
+            options.AddPolicy("RegisterLimiter", ctx =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    }
+                )
+            );
+            
+            // Decryption limted per user
+            options.AddPolicy("DecryptionLimiter", ctx =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    ctx.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(1),
+                    }
+                )
+            );
+        });
+
         return services;
     }
 }
