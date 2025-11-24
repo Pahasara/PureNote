@@ -15,9 +15,6 @@ public class DiaryEntryConfiguration : IEntityTypeConfiguration<DiaryEntry>
             .HasMaxLength(200)
             .IsRequired();
         
-        builder.Property(e => e.EncryptedContent)
-            .IsRequired();
-
         builder.Property(e => e.Mood)
             .HasMaxLength(50);
         
