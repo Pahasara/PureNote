@@ -1,15 +1,24 @@
 using PureNote.Api.Endpoints;
 using PureNote.Api.Extensions;
+using PureNote.Api.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure services
 builder.Services
+    // Infrastructure
     .AddDatabase(builder.Configuration)
     .AddIdentityServices()
     .AddJwtAuthentication(builder.Configuration)
     .AddCorsPolicy(builder.Configuration)
+    .AddRateLimiters()
+    
+    // Application Services
+    .AddScoped<ITagService, TagService>()
+    .AddScoped<IEncryptionService, EncryptionService>()
+    
+    // Cross-cutting
     .AddValidation()
     .AddApiDocumentation();
 
@@ -29,13 +38,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
 
-// Authentication & Authorization
+app.UseCors();
+
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Map Endpoints
 app.MapAuthEndpoints();
+app.MapDiaryEndpoint();
 
 app.Run();
