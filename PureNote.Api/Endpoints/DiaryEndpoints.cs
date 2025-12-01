@@ -20,7 +20,7 @@ public static class DiaryEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        diaryGroup.MapPut("/search", DiaryHandlers.SearchEntries)
+        diaryGroup.MapGet("/search", DiaryHandlers.SearchEntries)
             .WithName("SearchEntries")
             .WithSummary("Searches diary entries with filters")
             .Produces(StatusCodes.Status200OK)
@@ -31,7 +31,7 @@ public static class DiaryEndpoints
             .WithSummary("Get list of all diary entries")
             .Produces<IEnumerable<EntryListItemDto>>()
             .Produces(StatusCodes.Status401Unauthorized);
-        
+
         diaryGroup.MapPost("/{id}/decrypt", DiaryHandlers.GetDecryptedEntry)
             .RequireRateLimiting("DecryptionLimiter")
             .WithName("GetDecryptedEntry")
@@ -43,7 +43,7 @@ public static class DiaryEndpoints
             .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
-        
+
         diaryGroup.MapPut("/{id}", DiaryHandlers.UpdateEntry)
             .WithName("UpdateEntry")
             .WithSummary("Updates an existing diary entry")

@@ -13,11 +13,11 @@ builder.Services
     .AddJwtAuthentication(builder.Configuration)
     .AddCorsPolicy(builder.Configuration)
     .AddRateLimiters()
-    
+
     // Application Services
     .AddScoped<ITagService, TagService>()
     .AddScoped<IEncryptionService, EncryptionService>()
-    
+
     // Cross-cutting
     .AddValidation()
     .AddApiDocumentation();
@@ -28,8 +28,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    
-    // Scalar API documnetation UI
+
+    // Scalar API documentation UI
     app.MapScalarApiReference(options =>
         options.WithTitle("PureNote API")
             .WithTheme(ScalarTheme.Kepler)

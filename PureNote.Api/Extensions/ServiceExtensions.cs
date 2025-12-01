@@ -19,10 +19,10 @@ public static class ServiceExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        
+
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
-        
+
         return services;
     }
 
@@ -36,16 +36,16 @@ public static class ServiceExtensions
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
-    
+
                 // User settings
                 options.User.RequireUniqueEmail = true;
-    
+
                 // Signin settings
                 options.SignIn.RequireConfirmedEmail = false;
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
-        
+
         return services;
     }
 
@@ -54,7 +54,7 @@ public static class ServiceExtensions
     {
         var jwtkey = configuration["Jwt:Key"] ??
                      throw new InvalidOperationException("JWT:Key is not configured");
-        
+
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -72,7 +72,7 @@ public static class ServiceExtensions
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.Zero,
-            
+
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
@@ -81,10 +81,10 @@ public static class ServiceExtensions
             });
 
         services.AddAuthorization();
-        
+
         // Register Jwt service
         services.AddScoped<IJwtService, JwtService>();
-        
+
         return services;
     }
 
@@ -92,7 +92,7 @@ public static class ServiceExtensions
     {
         var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>() ??
                              ["https://localhost:3000"];
-        
+
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -103,7 +103,7 @@ public static class ServiceExtensions
                     .AllowCredentials();
             });
         });
-        
+
         return services;
     }
 
@@ -118,13 +118,13 @@ public static class ServiceExtensions
                     Title = "PureNote API",
                     Version = "v1.0",
                     Description = "A secure diary and note-taking API with strong encryption",
-                    Contact =  new OpenApiContact
+                    Contact = new OpenApiContact
                     {
                         Name = "Pahasara DvNET",
                         Email = "pahasaradev@proton.me",
                     }
                 };
-                
+
                 // Add JWT Bearer authentication scheme
                 document.Components ??= new OpenApiComponents();
                 document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>
@@ -141,7 +141,7 @@ public static class ServiceExtensions
                 return Task.CompletedTask;
             });
         });
-        
+
         return services;
     }
 
@@ -167,7 +167,7 @@ public static class ServiceExtensions
                     }
                 )
             );
-                
+
             // Register spam protection
             options.AddPolicy("RegisterLimiter", ctx =>
                 RateLimitPartition.GetFixedWindowLimiter(
@@ -180,15 +180,16 @@ public static class ServiceExtensions
                     }
                 )
             );
-            
-            // Decryption limted per user
+
+            // Decryption limited per user
             options.AddPolicy("DecryptionLimiter", ctx =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     ctx.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anonymous",
                     _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 5,
+                        PermitLimit = 10,
                         Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 2
                     }
                 )
             );
