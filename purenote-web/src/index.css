@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark-bg: #000000;
+  --color-dark-card: #121712;
+  --color-dark-border: #1f2a1f;
+  --color-dark-hover: #1a231a;
+
+  --color-primary-blue: #00b3ff;
+  --color-primary-blue-hover: #0099cc;
+
+  --color-neon-blue: #00d9ff;
+  --color-neon-purple: #a855f7;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-dark-bg;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-dark-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-hover;
+  }
+}
+
+@utility glass {
+  @apply bg-dark-card/50 backdrop-blur-md border border-dark-border;
+}
+
+@utility btn-primary {
+  @apply bg-primary-blue 
+         hover:bg-primary-blue-hover
+         text-white font-medium
+         px-6 py-2.5 rounded-full
+         transition-colors duration-200;
+}
+
+@utility btn-secondary {
+  @apply bg-dark-hover 
+         hover:bg-dark-border
+         text-white font-medium
+         px-6 py-2.5 rounded-full
+         transition-colors duration-200;
+}
+
+@utility input-field {
+  @apply bg-dark-bg border border-dark-border rounded-lg
+         px-4 py-3 text-white
+         placeholder-gray-500
+         focus:outline-none focus:border-primary-blue
+         transition-colors duration-200;
+}
