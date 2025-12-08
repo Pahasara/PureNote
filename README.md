@@ -1,74 +1,81 @@
 # **PureNote**
 
 A minimal, secure full-stack encrypted diary and note-taking platform.
-Built with **ASP.NET Core 10**, **EF Core 10**, **Identity**, **JWT**, **PostgreSQL**, and documented using **Scalar**.
 
-A React-based frontend will be available soon, integrating directly with this API.
+**Backend:** ASP.NET Core 10 · EF Core 10 · Identity · JWT · PostgreSQL · Scalar  
+**Frontend:** React 19 · TypeScript · Vite · Tailwind CSS · Zustand
 
 ---
 
 ## **Features**
 
+### Backend
 * Register & login using **email or username**
-* JWT-based authentication
-* EF Core (PostgreSQL provider)
-* Clean layered structure (Entities, DTOs, Services, Endpoints, Validators)
+* JWT-based authentication with refresh tokens
+* End-to-end encryption for diary entries
+* EF Core with PostgreSQL
+* Clean layered architecture (Entities, DTOs, Services, Endpoints, Validators)
 * Automatic OpenAPI generation + **Scalar UI**
-* CORS configuration for SPA frontends
-* Development-mode DB migrations (manual by default)
+* FluentValidation for request validation
+
+### Frontend
+* Modern React with TypeScript
+* Secure authentication flow
+* Diary CRUD operations (Create, Read, Update, Delete)
+* Zustand state management
+* Tailwind CSS styling
+* HTTPS development environment
 
 ---
 
 ## **Requirements**
 
-### **Core tools**
-
+### **Backend**
 * **.NET 10 SDK**
 * **PostgreSQL 18**
 * EF Core tools:
-
 ```sh
 dotnet tool install --global dotnet-ef
 ```
 
+### **Frontend**
+* **Node.js 18+*
+* **npm** or **pnpm**
+
 ### **Linux / Arch Users**
-
-Install:
-
+Install backend dependencies:
 ```sh
-yay -S dotnet-sdk-10.0-bin
-sudo pacman -S postgresql
+sudo pacman -S dotnet-sdk aspnet-runtime postgresql
 ```
 
-.NET setup docs:
-[https://wiki.archlinux.org/title/.NET](https://wiki.archlinux.org/title/.NET)
+Install frontend dependencies:
+```sh
+sudo pacman -S nodejs npm
+```
 
-PostgreSQL setup docs:
-[https://wiki.archlinux.org/title/PostgreSQL](https://wiki.archlinux.org/title/PostgreSQL)
+Docs:
+* [.NET on Arch Linux](https://wiki.archlinux.org/title/.NET)
+* [PostgreSQL on Arch Linux](https://wiki.archlinux.org/title/PostgreSQL)
 
 ### **Windows Users**
-
-* Install .NET 10 via: [https://dotnet.microsoft.com](https://dotnet.microsoft.com)
-* Install PostgreSQL via: [https://www.postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
+* .NET 10: [https://dotnet.microsoft.com](https://dotnet.microsoft.com)
+* PostgreSQL: [https://www.postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
+* Node.js: [https://nodejs.org](https://nodejs.org)
 
 ---
 
 ## **Configuration**
 
-### **Database**
+### **Backend (appsettings.json)**
 
-Update your PostgreSQL connection string:
-
+**Database:**
 ```json
 "ConnectionStrings": {
   "DefaultConnection": "Host=localhost;Database=purenote;Username=YOUR_USER;Password=YOUR_PASS"
 }
 ```
 
-### **JWT**
-
-Use a strong 32B+ key:
-
+**JWT:**
 ```json
 "Jwt": {
   "Key": "your-super-long-unique-32-byte-secret-key-here",
@@ -78,53 +85,120 @@ Use a strong 32B+ key:
 }
 ```
 
+**CORS:**
+```json
+"AllowedOrigins": [
+  "https://localhost:3000"
+]
+```
+
+### **Frontend (src/services/api.ts)**
+
+Update the API base URL if needed:
+```typescript
+const API_BASE_URL = "https://localhost:7000/api";
+```
+
 ---
 
-## **Database Setup**
+## **Setup & Running**
 
-### Apply existing migrations:
+### **1. Backend Setup**
 
 ```sh
+cd PureNote.Api
+
+# Apply migrations
 dotnet ef database update
-```
 
-### Add new migration:
-
-```sh
-dotnet ef migrations add MigrationName -o Data/Migrations
-```
-
----
-
-## **Running the API**
-
-```
+# Run the API
 dotnet run
 ```
 
+API will be available at:
+* **HTTPS:** `https://localhost:7000`
+* **Scalar Docs:** `https://localhost:7000/scalar`
+
+### **2. Frontend Setup**
+
+```sh
+cd purenote-web
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+```
+
+Frontend will be available at:
+* **HTTPS:** `https://localhost:3000`
+
 ---
 
-## **Scalar Documentation**
+## **Development**
+
+### **Backend**
+
+**Run with hot reload:**
+```sh
+dotnet watch
+```
+
+### **Frontend**
+
+**Development mode:**
+```sh
+npm run dev
+```
+
+---
+
+## **API Documentation**
+
+Interactive API documentation is available via **Scalar**:
 
 ```
 https://localhost:7000/scalar
 ```
 
+Explore endpoints, test requests, and view schemas directly in the browser.
+
 ---
 
 ## **Tech Stack**
 
-* **ASP.NET Core 10**
-* **EF Core 10**
-* **Identity 10.0.0**
-* **JWT Authentication 10.0.0**
-* **PostgreSQL (Npgsql 10.0.0-rc.2)**
-* **Scalar.AspNetCore 2.11.0**
-* **FluentValidation 12.1.0**
+### Backend
+* **ASP.NET Core 10** - Minimal APIs
+* **EF Core 10** - ORM with PostgreSQL
+* **Identity 10.0.0** - User management
+* **JWT Authentication 10.0.0** - Secure token-based auth
+* **Npgsql 10.0.0** - PostgreSQL provider
+* **Scalar.AspNetCore 2.11.0** - API documentation
+* **FluentValidation 12.1.0** - Request validation
+
+### Frontend
+* **React 19** - UI library
+* **TypeScript** - Type safety
+* **Vite** - Build tool & dev server
+* **Tailwind CSS 4** - Utility-first styling
+* **Zustand** - Lightweight state management
+* **React Router 7** - Client-side routing
+* **Axios** - HTTP client
+
+---
+
+## **Security**
+
+* **End-to-end encryption** for diary entries
+* **JWT authentication** with secure token handling
+* **HTTPS-only** in development and production
+* **Input validation** with FluentValidation
+* **CORS** configured for frontend origin
+* **Password hashing** via ASP.NET Core Identity
 
 ---
 
 ## **License**
 
 Licensed under the **[GNU GPLv3](LICENSE)**.
-
