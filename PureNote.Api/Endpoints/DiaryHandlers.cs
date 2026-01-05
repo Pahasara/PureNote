@@ -4,6 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PureNote.Api.Data;
+using PureNote.Api.Models.DTOs.Common;
 using PureNote.Api.Models.DTOs.Diary;
 using PureNote.Api.Models.Entities;
 using PureNote.Api.Services;
@@ -20,7 +21,6 @@ public static class DiaryHandlers
         IValidator<CreateEntryDto> validator,
         ClaimsPrincipal user,
         UserManager<User> userManager,
-        IEncryptionService encryptionService,
         ITagService tagService)
     {
         var validationResult = await validator.ValidateAsync(dto);
@@ -33,13 +33,11 @@ public static class DiaryHandlers
         
         var currentUser = await userManager.FindByIdAsync(userId);
         if (currentUser?.EncryptionSalt is null)
-        {
-            return Results.BadRequest("User encryption not configured");
-        }
+            return Results.BadRequest(new ErrorResponse("User encryption not configured"));
 
         try
         {
-            var encryptedContent = encryptionService.Encrypt(
+            var encryptedContent = EncryptionService.Encrypt(
                 dto.Content,
                 dto.Password,
                 currentUser.EncryptionSalt
@@ -73,7 +71,7 @@ public static class DiaryHandlers
 
             return Results.Created($"{EndpointDiary}/{entry.Id}", response);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return Results.Problem(
                 detail: "Failed to create diary entry",
@@ -84,8 +82,7 @@ public static class DiaryHandlers
 
     public static async Task<IResult> ListEntries(
         AppDbContext dbContext,
-        ClaimsPrincipal user
-    )
+        ClaimsPrincipal user)
     {
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -136,7 +133,7 @@ public static class DiaryHandlers
 
         if (!string.IsNullOrEmpty(tags))
         {
-            IEnumerable<string> tagList = tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var tagList = tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
             query = query.Where(e => e.Tags.Any(t => tagList.Contains(t.Name)));
         }
         
@@ -164,11 +161,8 @@ public static class DiaryHandlers
         DecryptedEntryDto dto,
         IValidator<DecryptedEntryDto> validator,
         ClaimsPrincipal user,
-        UserManager<User> userManager,
-        IEncryptionService encryptionService
-        )
+        UserManager<User> userManager)
     {
-        
         var validationResult = await validator.ValidateAsync(dto);
         if (!validationResult.IsValid)
             return Results.ValidationProblem(validationResult.ToDictionary());
@@ -182,20 +176,18 @@ public static class DiaryHandlers
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (entry is null)
-            return Results.NotFound(new { message = "Diary entry not found" });
+            return Results.NotFound(new ErrorResponse("Diary entry not found"));
 
         if (entry.UserId != userId)
             return Results.Forbid();
 
         var currentUser = await userManager.FindByIdAsync(userId);
         if (currentUser?.EncryptionSalt is null)
-        {
-            return Results.BadRequest(new { message = "User encryption not configured" });
-        }
+            return Results.BadRequest(new ErrorResponse("User encryption not configured"));
 
         try
         {
-            var decryptedContent = encryptionService.Decrypt(
+            var decryptedContent = EncryptionService.Decrypt(
                 cipherText: entry.EncryptedContent,
                 password: dto.Password,
                 saltBase64: currentUser.EncryptionSalt
@@ -213,11 +205,11 @@ public static class DiaryHandlers
 
             return Results.Ok(response);
         }
-        catch (CryptographicException ex)
+        catch (CryptographicException)
         {
-            return Results.BadRequest(new { message = "Invalid encryption password" });
+            return Results.BadRequest(new ErrorResponse("Invalid encryption password"));
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return Results.Problem(
                 detail: "Failed to decrypt diary entry",
@@ -233,7 +225,6 @@ public static class DiaryHandlers
         ClaimsPrincipal user,
         AppDbContext dbContext,
         UserManager<User> userManager,
-        IEncryptionService encryptionService,
         ITagService tagService)
     {
         var validationResult = await validator.ValidateAsync(dto);
@@ -249,20 +240,18 @@ public static class DiaryHandlers
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (entry is null)
-            return Results.NotFound(new { message = "Diary entry not found" });
+            return Results.NotFound(new ErrorResponse("Diary entry not found"));
 
         if (entry.UserId != userId)
             return Results.Forbid();
         
         var currentUser = await userManager.FindByIdAsync(userId);
         if (currentUser?.EncryptionSalt is null)
-        {
-            return Results.BadRequest(new { message = "User encryption not configured" });
-        }
+            return Results.BadRequest(new ErrorResponse("User encryption not configured"));
 
         try
         {
-            var encryptedContent = encryptionService.Encrypt(
+            var encryptedContent = EncryptionService.Encrypt(
                 plainText: dto.Content,
                 password: dto.Password,
                 saltBase64: currentUser.EncryptionSalt
@@ -290,7 +279,7 @@ public static class DiaryHandlers
 
             return Results.Ok(response);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return Results.Problem(
                 detail: "Failed to update diary entry",
@@ -312,10 +301,10 @@ public static class DiaryHandlers
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (entry is null)
-            return Results.NotFound(new { message = "Diary entry not found" });
+            return Results.NotFound(new ErrorResponse("Diary entry not found"));
 
         if (entry.UserId != userId)
-           return Results.Forbid();
+            return Results.Forbid();
 
         dbContext.DiaryEntries.Remove(entry);
         await dbContext.SaveChangesAsync();

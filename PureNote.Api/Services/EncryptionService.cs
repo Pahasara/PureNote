@@ -3,7 +3,7 @@ using System.Text;
 
 namespace PureNote.Api.Services;
 
-public class EncryptionService : IEncryptionService
+public static class EncryptionService
 {
     private const int KeySizeInBytes = 32;      // 256-bit key
     private const int NonceSizeInBytes = 12;    // Recommended for AES-GCM
@@ -11,7 +11,7 @@ public class EncryptionService : IEncryptionService
     private const int SaltSizeInBytes = 32;     // Per-user salt
     private const int Iterations = 600_000;     // OWASP 2023
     
-    public string Encrypt(string plainText, string password, string saltBase64)
+    public static string Encrypt(string plainText, string password, string saltBase64)
     {
         byte[] key = DeriveKeyFromPassword(password, saltBase64);
         
@@ -35,7 +35,7 @@ public class EncryptionService : IEncryptionService
         return Convert.ToBase64String(result);
     }
 
-    public string Decrypt(string cipherText, string password, string saltBase64)
+    public static string Decrypt(string cipherText, string password, string saltBase64)
     {
         byte[] key = DeriveKeyFromPassword(password, saltBase64);
         byte[] encryptedData = Convert.FromBase64String(cipherText);

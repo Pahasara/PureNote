@@ -15,7 +15,7 @@ public class CreateEntryDtoValidator: AbstractValidator<CreateEntryDto>
             .NotEmpty().WithMessage("Password is required");
         
         RuleFor(e => e.Mood)
-            .MaximumLength(50).WithMessage("Mood cannot exceed 20 characters");
+            .MaximumLength(50).WithMessage("Mood cannot exceed 50 characters.");
 
         RuleFor(e => e.Tags)
             .Must(tags => tags == null || tags.Count <= 20)

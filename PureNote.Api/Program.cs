@@ -16,7 +16,6 @@ builder.Services
 
     // Application Services
     .AddScoped<ITagService, TagService>()
-    .AddScoped<IEncryptionService, EncryptionService>()
 
     // Cross-cutting
     .AddValidation()

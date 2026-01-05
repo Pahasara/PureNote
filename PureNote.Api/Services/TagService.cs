@@ -8,30 +8,35 @@ public class TagService (AppDbContext dbContext) : ITagService
 {
     public async Task<List<Tag>> GetOrCreateTagsAsync(ICollection<string> tagNames, string userId)
     {
-        if (tagNames is null || !tagNames.Any())
-            return new List<Tag>();
+        if (tagNames is null || tagNames.Count == 0)
+            return [];
+        
+        var distinctNames = tagNames
+            .Where(t => !string.IsNullOrEmpty(t))
+            .Select(t => t.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
-        var tags = new List<Tag>();
+        if (distinctNames.Count == 0)
+            return [];
+        
+        var existingTags = await dbContext.Tags
+            .Where(t => distinctNames.Contains(t.Name) && t.UserId == userId)
+            .ToDictionaryAsync(t => t.Name, StringComparer.OrdinalIgnoreCase);
+        
+        var result = new List<Tag>(distinctNames.Count);
 
-        foreach (var tagName in tagNames.Distinct())
+        foreach (var name in distinctNames)
         {
-            var tag = await dbContext.Tags
-                .FirstOrDefaultAsync(t=> t.Name == tagName && t.UserId == userId);
-
-            if (tag is null)
+            if (!existingTags.TryGetValue(name, out var tag))
             {
-                tag = new Tag
-                {
-                    Name = tagName,
-                    UserId = userId
-                };
+                tag = new Tag {Name = name,  UserId = userId};
                 dbContext.Tags.Add(tag);
             }
-            
-            tags.Add(tag);
+            result.Add(tag);
         }
         
         await  dbContext.SaveChangesAsync();
-        return tags;
+        return result;
     }
 }
